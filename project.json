@@ -13,7 +13,8 @@
 			"dependencies": ["c3w"],
 			"dependency-search-paths": ["./libs"],
 			"linked-libraries": ["wgpu_native"],
-			"linker-search-paths": ["./libs/wgpu-native/lib"]
+			"linker-search-paths": ["./libs/wgpu-native/lib"],
+			"link-args": ["-Wl,-rpath,\\$ORIGIN/../libs/wgpu-native/lib"]
 		},
 		"zip": {
 			"type": "prepare",

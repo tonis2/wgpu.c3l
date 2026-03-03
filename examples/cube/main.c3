@@ -82,56 +82,9 @@ const uint[36] INDICES = {
     20, 21, 22,  20, 22, 23,   // bottom
 };
 
-// ----------------------------------------------------------------
-// Simple 4×4 matrix math (row-major, column vectors)
-// ----------------------------------------------------------------
-
-alias Mat4 = float[16];
-
-fn Mat4 mat4_perspective(float fovy_rad, float aspect, float znear, float zfar) {
-    float f = 1.0f / math::tan(fovy_rad * 0.5f);
-    float range_inv = 1.0f / (znear - zfar);
-    return {
-        f / aspect, 0, 0, 0,
-        0, f, 0, 0,
-        0, 0, (zfar + znear) * range_inv, -1,
-        0, 0, 2 * zfar * znear * range_inv, 0,
-    };
-}
-
-fn Mat4 mat4_translate(float x, float y, float z) {
-    return {
-        1,0,0,0,
-        0,1,0,0,
-        0,0,1,0,
-        x,y,z,1,
-    };
-}
-
-fn Mat4 mat4_rotate_y(float angle) {
-    float c = math::cos(angle);
-    float s = math::sin(angle);
-    return {
-         c, 0, s, 0,
-         0, 1, 0, 0,
-        -s, 0, c, 0,
-         0, 0, 0, 1,
-    };
-}
-
-fn Mat4 mat4_mul(Mat4 a, Mat4 b) {
-    Mat4 r;
-    for (int row = 0; row < 4; row++) {
-        for (int col = 0; col < 4; col++) {
-            float sum = 0;
-            for (int k = 0; k < 4; k++) {
-                sum += a[row * 4 + k] * b[k * 4 + col];
-            }
-            r[row * 4 + col] = sum;
-        }
-    }
-    return r;
-}
+// Matrix type alias for convenience (stdlib row-major Matrix4x4).
+// Upload to GPU with .transpose() since WGSL mat4x4 is column-major.
+alias Mat4 = math::Matrix4f;
 
 // ----------------------------------------------------------------
 // Adapter / Device callback state
@@ -367,9 +320,10 @@ fn void main() {
     RenderPipeline pipeline = deviceCreateRenderPipeline(device, &rp_desc);
 
     // --- Projection & view ---
+    // Stdlib matrices are row-major; transpose before uploading since WGSL is column-major.
     float aspect = (float)window.width / (float)window.height;
-    Mat4 proj = mat4_perspective((float)math::PI / 4.0f, aspect, 0.1f, 100.0f);
-    Mat4 view = mat4_translate(0.0f, 0.0f, -4.0f);
+    Mat4 proj = matrix4f_perspective((float)math::PI / 4.0f, aspect, 0.1f, 100.0f);
+    Mat4 view = MATRIX4F_IDENTITY.translate({0.0f, 0.0f, -4.0f});
 
     float angle = 0.0f;
 
@@ -384,11 +338,12 @@ fn void main() {
             break;
         }
 
-        // Rotate cube
+        // Rotate cube, build MVP, transpose for WGSL column-major upload
         angle += 0.01f;
-        Mat4 model = mat4_rotate_y(angle);
-        Mat4 mvp   = mat4_mul(mat4_mul(proj, view), model);
-        ub.upload(queue, &mvp, 64);
+        Mat4 model   = MATRIX4F_IDENTITY.rotate_y(angle);
+        Mat4 mvp     = proj * view * model;
+        Mat4 mvp_t   = mvp.transpose();
+        ub.upload(queue, &mvp_t, 64);
 
         // Get surface texture
         SurfaceTexture surf_tex;
