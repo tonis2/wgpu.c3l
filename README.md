@@ -49,3 +49,5 @@ Then import it:
 ```c3
 import wgpu;
 ```
+
+GLTF loading example can be found [here](https://github.com/tonis2/wgpu-gltf/)
