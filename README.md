@@ -1,4 +1,4 @@
-# webgpu.c3l
+# wgpu.c3l
 
 WebGPU bindings for the [C3 programming language](https://c3-lang.org), generated from the official [webgpu-native](https://github.com/webgpu-native/webgpu-headers) JSON spec.
 
