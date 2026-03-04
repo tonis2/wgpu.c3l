@@ -7,6 +7,16 @@
 			"type": "executable",
 			"sources": ["./parser/*"]
 		},
+		"cube_web": {
+			"type": "executable",
+			"sources": ["examples/cube/main_web.c3", "lib/*"],
+			"target": "wasm32",
+			"link-libc": false,
+			"reloc": "none",
+			"debug-info": "none",
+			"no-entry": true,
+			"output": "examples/cube/web"
+		},
 		"cube": {
 			"type": "executable",
 			"sources": ["examples/cube/main.c3", "lib/*"],

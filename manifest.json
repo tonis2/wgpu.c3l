@@ -6,6 +6,8 @@
     "macos-x64" : {
       "linked-libraries" : ["wgpu_native"]
     },
+    "wasm32" : {
+    },
     "macos-aarch64" : {
       "linked-libraries" : ["wgpu_native"]
     },
