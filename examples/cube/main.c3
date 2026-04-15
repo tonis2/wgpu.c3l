@@ -348,8 +348,8 @@ fn void main() {
     // --- Projection & view ---
     // Stdlib matrices are row-major; transpose before uploading since WGSL is column-major.
     float aspect = (float)window.width / (float)window.height;
-    Mat4 proj = matrix4f_perspective((float)math::PI / 4.0f, aspect, 0.1f, 100.0f);
-    Mat4 view = MATRIX4F_IDENTITY.translate({0.0f, 0.0f, -4.0f});
+    Mat4 proj = matrix::perspective((float)math::PI / 4.0f, aspect, 0.1f, 100.0f);
+    Mat4 view = matrix::IDENTITY4.translate({0.0f, 0.0f, -4.0f});
 
     float angle = 0.0f;
 
@@ -366,10 +366,9 @@ fn void main() {
 
         // Rotate cube, build MVP, transpose for WGSL column-major upload
         angle += 0.01f;
-        Mat4 model = MATRIX4F_IDENTITY.rotate_y(angle);
+        Mat4 model = matrix::IDENTITY4.rotate_y(angle);
         Mat4 mvp   = proj * view * model;
-        Mat4 mvp_t = mvp.transpose();
-        ub.upload(queue, &mvp_t, 64);
+        ub.upload(queue, &mvp, 64);
 
         // Get surface texture
         SurfaceTexture surf_tex;
